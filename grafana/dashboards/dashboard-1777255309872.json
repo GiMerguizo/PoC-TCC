@@ -2,24 +2,11 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "addfd58",
-    "namespace": "default",
-    "uid": "69b85018-ff09-4898-8edc-f7084b193f70",
-    "resourceVersion": "1777080882218988",
+    "name": "adbk5q5",
     "generation": 2,
-    "creationTimestamp": "2026-04-25T01:34:38Z",
-    "labels": {
-      "grafana.app/deprecatedInternalID": "3217517988478976"
-    },
-    "annotations": {
-      "grafana.app/createdBy": "user:ffk3ys34a2hoga",
-      "grafana.app/folder": "afk3ys83xrkzkc",
-      "grafana.app/saved-from-ui": "Grafana v13.0.1 (a100054f)",
-      "grafana.app/updatedBy": "user:ffk3ys34a2hoga",
-      "grafana.app/updatedTimestamp": "2026-04-25T01:34:42Z",
-      "grafana.app/folderTitle": "Cowrie",
-      "grafana.app/folderUrl": "/dashboards/f/afk3ys83xrkzkc/cowrie"
-    }
+    "creationTimestamp": "2026-04-27T02:00:55Z",
+    "labels": {},
+    "annotations": {}
   },
   "spec": {
     "annotations": [
@@ -30,10 +17,10 @@
             "kind": "DataQuery",
             "group": "grafana",
             "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
+            "spec": {},
+            "labels": {
+              "grafana.app/export-label": "grafana-1"
+            }
           },
           "enable": true,
           "hide": true,
@@ -64,14 +51,14 @@
                       "kind": "DataQuery",
                       "group": "loki",
                       "version": "v0",
-                      "datasource": {
-                        "name": "P8E80F9AEF21F6940"
-                      },
                       "spec": {
                         "direction": "backward",
                         "editorMode": "builder",
-                        "expr": "{filename=\"/var/log/cowrie/cowrie.json\"} |= ``",
+                        "expr": "{service_name=\"cowrie_logs\"} |= ``",
                         "queryType": "range"
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "loki-1"
                       }
                     },
                     "refId": "A",
@@ -155,7 +142,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "Honeypot",
+    "title": "Honeypot Dashboards",
     "variables": [],
     "preferences": {
       "layout": {
