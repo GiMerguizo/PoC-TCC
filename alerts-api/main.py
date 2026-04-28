@@ -1,7 +1,8 @@
 import os
 from fastapi import FastAPI, Request
 import requests
-from google import genai  # Importando a nova biblioteca oficial
+from google import genai
+from datetime import datetime
 
 app = FastAPI()
 
@@ -9,11 +10,13 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Inicializando o cliente da IA
 if GEMINI_API_KEY:
     client = genai.Client(api_key=GEMINI_API_KEY)
 else:
     client = None
+
+# Guarda os últimos 50 alertas na memória para o frontend consumir
+historico_alertas = []
 
 def enviar_telegram(mensagem):
     if not TELEGRAM_TOKEN or not CHAT_ID:
@@ -48,7 +51,6 @@ def analisar_com_ia(dados_alerta):
     """
     
     try:
-        # Usando a sintaxe moderna do novo SDK
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=prompt,
@@ -65,18 +67,22 @@ async def recebe_alerta(request: Request):
     if status == "firing":
         print("Novo ataque detectado! Iniciando análise com IA via SDK moderno...")
         
-        # alertas = dados.get("alerts", [])
-        # detalhes_do_ataque = alertas[0] if alertas else dados
-        
-        # relatorio_ia = analisar_com_ia(detalhes_do_ataque)
-        
         alertas = dados.get("alerts", [])
         detalhes_do_ataque = alertas[0] if alertas else dados
-        
-        # Converte para string e corta nos primeiros 2000 caracteres
         texto_do_ataque = str(detalhes_do_ataque)[:2000]
         
         relatorio_ia = analisar_com_ia(texto_do_ataque)
+        
+        # --- SALVANDO NA MEMÓRIA PARA O FRONTEND ---
+        novo_alerta = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "status": status,
+            "raw_data": detalhes_do_ataque,
+            "ai_analysis": relatorio_ia
+        }
+        historico_alertas.insert(0, novo_alerta) # Adiciona no início da lista
+        if len(historico_alertas) > 50:
+            historico_alertas.pop() # Mantém apenas os últimos 50
         
         mensagem_final = f"🚨 *NOVO ATAQUE DETECTADO NO HONEYPOT*\n\n{relatorio_ia}"
         enviar_telegram(mensagem_final)
@@ -86,3 +92,8 @@ async def recebe_alerta(request: Request):
     else: 
         print(f"Alerta recebido com status: {status}. Ignorando.")
         return {"status": "Ignorado"}
+
+# --- NOVA ROTA PARA O FRONTEND ---
+@app.get("/alerts")
+async def listar_alertas():
+    return {"total": len(historico_alertas), "alerts": historico_alertas}
