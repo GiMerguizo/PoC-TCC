@@ -15,9 +15,6 @@ if GEMINI_API_KEY:
 else:
     client = None
 
-# Guarda os últimos 50 alertas na memória para o frontend consumir
-historico_alertas = []
-
 def enviar_telegram(mensagem):
     if not TELEGRAM_TOKEN or not CHAT_ID:
         print("Erro: Credenciais do Telegram não configuradas no .env")
@@ -94,6 +91,13 @@ async def recebe_alerta(request: Request):
         return {"status": "Ignorado"}
 
 # --- NOVA ROTA PARA O FRONTEND ---
+historico_alertas = []
+
 @app.get("/alerts")
 async def listar_alertas():
     return {"total": len(historico_alertas), "alerts": historico_alertas}
+
+# E dentro da função recebe_alerta (status == "firing"), salve o dado:
+historico_alertas.insert(0, {
+    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+})
